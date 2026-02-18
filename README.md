@@ -34,3 +34,23 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## API Endpoints
+
+This project includes the following API endpoints:
+
+### Summary
+- **Endpoint**: `/api/summary`
+- **Description**: Provides current quarter revenue, target, gap percentage, and quarter-over-quarter change.
+
+### Revenue Drivers
+- **Endpoint**: `/api/drivers`
+- **Description**: Explains performance using pipeline size, win rate, average deal size, and sales cycle time.
+
+### Risk Factors
+- **Endpoint**: `/api/risk-factors`
+- **Description**: Identifies stale deals, underperforming reps, and low-activity accounts.
+
+### Recommendations
+- **Endpoint**: `/api/recommendations`
+- **Description**: Returns actionable suggestions to improve sales performance.
