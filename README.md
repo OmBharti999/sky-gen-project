@@ -54,3 +54,7 @@ This project includes the following API endpoints:
 ### Recommendations
 - **Endpoint**: `/api/recommendations`
 - **Description**: Returns actionable suggestions to improve sales performance.
+
+
+<!-- Resources  -->
+https://mui.com/material-ui/integrations/nextjs/
