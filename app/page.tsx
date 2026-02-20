@@ -1,5 +1,6 @@
 import { Header } from "./_components/Header";
 import { RecommendedActions } from "./_components/RecommendedActions";
+import { RevenueDriversCard } from "./_components/RevenueDriversCard";
 import { RevenueTrendChart } from "./_components/RevenueTrendChart";
 import { SummaryBanner } from "./_components/SummaryBanner";
 import { TopRiskFactors } from "./_components/TopRiskFactors";
@@ -33,6 +34,7 @@ export default function Home() {
           { month: "Mar", revenue: 46, target: 52 },
         ]}
       />
+      <RevenueDriversCard />
     </>
   );
 }
