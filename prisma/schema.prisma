@@ -100,7 +100,7 @@ model Deal {
   rep_id     String
   Rep        Rep        @relation(fields: [rep_id], references: [rep_id])
   stage      DealStage
-  amount     Float
+  amount     Float?
   created_at DateTime
   closed_at  DateTime?
   activities Activity[]
