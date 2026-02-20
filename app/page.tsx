@@ -7,14 +7,19 @@ import {
   SummaryBanner,
   TopRiskFactors,
 } from "./_components";
+import { getSummaryData } from "./_services/summaryService";
+// index.ts
+// Query your database using the Accelerate Client extension
 
-export default function Home() {
+export default async function Home() {
+  const summaryData = await getSummaryData();
+  console.log("🚀 ~ Home ~ summaryData:", summaryData)
   return (
     <>
       <Header />
       <Box sx={{ backgroundColor: "#f3f4f6", minHeight: "100vh", py: 4 }}>
         <Container maxWidth="xl">
-          <SummaryBanner revenue={1420000} target={2000000} />
+          <SummaryBanner revenue={summaryData?.data?.quaterlyRevenue || 0} target={summaryData?.data?.quaterlyTarget || 0} />
 
           {/* Two‑column layout on desktop */}
           <Grid container spacing={3} sx={{ mt: 2 }}>

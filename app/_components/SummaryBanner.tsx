@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Typography, Divider } from "@mui/material";
+import { percentageGoalAchievementCalculator } from "../_lib/utils";
 
 interface Props {
   label?: string;
@@ -21,7 +22,10 @@ export const SummaryBanner = ({
   revenue,
   target,
 }: Props) => {
-  const percentage = Math.round(((revenue - target) / target) * 100);
+  const percentage = percentageGoalAchievementCalculator({
+    revenue,
+    target,
+  });
 
   return (
     <Box
@@ -60,14 +64,16 @@ export const SummaryBanner = ({
       </Typography>
 
       {/* Percentage */}
-      <Typography
-        variant="h6"
-        ml={3}
-        fontWeight={600}
-        color={percentage < 0 ? "error.main" : "success.main"}
-      >
-        {percentage}% to Goal
-      </Typography>
+      {percentage ? (
+        <Typography
+          variant="h6"
+          ml={3}
+          fontWeight={600}
+          color={percentage < 0 ? "error.main" : "success.main"}
+        >
+          {percentage}% to Goal
+        </Typography>
+      ) : null}
     </Box>
   );
 };
