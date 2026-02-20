@@ -207,7 +207,7 @@ export type DealGroupByOutputType = {
   account_id: string
   rep_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount: number | null
   created_at: Date
   closed_at: Date | null
   _count: DealCountAggregateOutputType | null
@@ -241,7 +241,7 @@ export type DealWhereInput = {
   account_id?: Prisma.StringFilter<"Deal"> | string
   rep_id?: Prisma.StringFilter<"Deal"> | string
   stage?: Prisma.EnumDealStageFilter<"Deal"> | $Enums.DealStage
-  amount?: Prisma.FloatFilter<"Deal"> | number
+  amount?: Prisma.FloatNullableFilter<"Deal"> | number | null
   created_at?: Prisma.DateTimeFilter<"Deal"> | Date | string
   closed_at?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   Account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
@@ -255,7 +255,7 @@ export type DealOrderByWithRelationInput = {
   account_id?: Prisma.SortOrder
   rep_id?: Prisma.SortOrder
   stage?: Prisma.SortOrder
-  amount?: Prisma.SortOrder
+  amount?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   closed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   Account?: Prisma.AccountOrderByWithRelationInput
@@ -272,7 +272,7 @@ export type DealWhereUniqueInput = Prisma.AtLeast<{
   account_id?: Prisma.StringFilter<"Deal"> | string
   rep_id?: Prisma.StringFilter<"Deal"> | string
   stage?: Prisma.EnumDealStageFilter<"Deal"> | $Enums.DealStage
-  amount?: Prisma.FloatFilter<"Deal"> | number
+  amount?: Prisma.FloatNullableFilter<"Deal"> | number | null
   created_at?: Prisma.DateTimeFilter<"Deal"> | Date | string
   closed_at?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
   Account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
@@ -286,7 +286,7 @@ export type DealOrderByWithAggregationInput = {
   account_id?: Prisma.SortOrder
   rep_id?: Prisma.SortOrder
   stage?: Prisma.SortOrder
-  amount?: Prisma.SortOrder
+  amount?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   closed_at?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DealCountOrderByAggregateInput
@@ -305,7 +305,7 @@ export type DealScalarWhereWithAggregatesInput = {
   account_id?: Prisma.StringWithAggregatesFilter<"Deal"> | string
   rep_id?: Prisma.StringWithAggregatesFilter<"Deal"> | string
   stage?: Prisma.EnumDealStageWithAggregatesFilter<"Deal"> | $Enums.DealStage
-  amount?: Prisma.FloatWithAggregatesFilter<"Deal"> | number
+  amount?: Prisma.FloatNullableWithAggregatesFilter<"Deal"> | number | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Deal"> | Date | string
   closed_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Deal"> | Date | string | null
 }
@@ -313,7 +313,7 @@ export type DealScalarWhereWithAggregatesInput = {
 export type DealCreateInput = {
   deal_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
   Account: Prisma.AccountCreateNestedOneWithoutDealsInput
@@ -327,7 +327,7 @@ export type DealUncheckedCreateInput = {
   account_id: string
   rep_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
   activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutDealInput
@@ -336,7 +336,7 @@ export type DealUncheckedCreateInput = {
 export type DealUpdateInput = {
   deal_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   Account?: Prisma.AccountUpdateOneRequiredWithoutDealsNestedInput
@@ -350,7 +350,7 @@ export type DealUncheckedUpdateInput = {
   account_id?: Prisma.StringFieldUpdateOperationsInput | string
   rep_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   activities?: Prisma.ActivityUncheckedUpdateManyWithoutDealNestedInput
@@ -362,7 +362,7 @@ export type DealCreateManyInput = {
   account_id: string
   rep_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
 }
@@ -370,7 +370,7 @@ export type DealCreateManyInput = {
 export type DealUpdateManyMutationInput = {
   deal_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -381,7 +381,7 @@ export type DealUncheckedUpdateManyInput = {
   account_id?: Prisma.StringFieldUpdateOperationsInput | string
   rep_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -504,8 +504,8 @@ export type EnumDealStageFieldUpdateOperationsInput = {
   set?: $Enums.DealStage
 }
 
-export type FloatFieldUpdateOperationsInput = {
-  set?: number
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
   increment?: number
   decrement?: number
   multiply?: number
@@ -561,7 +561,7 @@ export type DealUncheckedUpdateManyWithoutRepNestedInput = {
 export type DealCreateWithoutAccountInput = {
   deal_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
   Rep: Prisma.RepCreateNestedOneWithoutDealsInput
@@ -573,7 +573,7 @@ export type DealUncheckedCreateWithoutAccountInput = {
   deal_id: string
   rep_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
   activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutDealInput
@@ -614,7 +614,7 @@ export type DealScalarWhereInput = {
   account_id?: Prisma.StringFilter<"Deal"> | string
   rep_id?: Prisma.StringFilter<"Deal"> | string
   stage?: Prisma.EnumDealStageFilter<"Deal"> | $Enums.DealStage
-  amount?: Prisma.FloatFilter<"Deal"> | number
+  amount?: Prisma.FloatNullableFilter<"Deal"> | number | null
   created_at?: Prisma.DateTimeFilter<"Deal"> | Date | string
   closed_at?: Prisma.DateTimeNullableFilter<"Deal"> | Date | string | null
 }
@@ -622,7 +622,7 @@ export type DealScalarWhereInput = {
 export type DealCreateWithoutActivitiesInput = {
   deal_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
   Account: Prisma.AccountCreateNestedOneWithoutDealsInput
@@ -635,7 +635,7 @@ export type DealUncheckedCreateWithoutActivitiesInput = {
   account_id: string
   rep_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
 }
@@ -659,7 +659,7 @@ export type DealUpdateToOneWithWhereWithoutActivitiesInput = {
 export type DealUpdateWithoutActivitiesInput = {
   deal_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   Account?: Prisma.AccountUpdateOneRequiredWithoutDealsNestedInput
@@ -672,7 +672,7 @@ export type DealUncheckedUpdateWithoutActivitiesInput = {
   account_id?: Prisma.StringFieldUpdateOperationsInput | string
   rep_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -680,7 +680,7 @@ export type DealUncheckedUpdateWithoutActivitiesInput = {
 export type DealCreateWithoutRepInput = {
   deal_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
   Account: Prisma.AccountCreateNestedOneWithoutDealsInput
@@ -692,7 +692,7 @@ export type DealUncheckedCreateWithoutRepInput = {
   deal_id: string
   account_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
   activities?: Prisma.ActivityUncheckedCreateNestedManyWithoutDealInput
@@ -729,7 +729,7 @@ export type DealCreateManyAccountInput = {
   deal_id: string
   rep_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
 }
@@ -737,7 +737,7 @@ export type DealCreateManyAccountInput = {
 export type DealUpdateWithoutAccountInput = {
   deal_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   Rep?: Prisma.RepUpdateOneRequiredWithoutDealsNestedInput
@@ -749,7 +749,7 @@ export type DealUncheckedUpdateWithoutAccountInput = {
   deal_id?: Prisma.StringFieldUpdateOperationsInput | string
   rep_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   activities?: Prisma.ActivityUncheckedUpdateManyWithoutDealNestedInput
@@ -760,7 +760,7 @@ export type DealUncheckedUpdateManyWithoutAccountInput = {
   deal_id?: Prisma.StringFieldUpdateOperationsInput | string
   rep_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -770,7 +770,7 @@ export type DealCreateManyRepInput = {
   deal_id: string
   account_id: string
   stage: $Enums.DealStage
-  amount: number
+  amount?: number | null
   created_at: Date | string
   closed_at?: Date | string | null
 }
@@ -778,7 +778,7 @@ export type DealCreateManyRepInput = {
 export type DealUpdateWithoutRepInput = {
   deal_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   Account?: Prisma.AccountUpdateOneRequiredWithoutDealsNestedInput
@@ -790,7 +790,7 @@ export type DealUncheckedUpdateWithoutRepInput = {
   deal_id?: Prisma.StringFieldUpdateOperationsInput | string
   account_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   activities?: Prisma.ActivityUncheckedUpdateManyWithoutDealNestedInput
@@ -801,7 +801,7 @@ export type DealUncheckedUpdateManyWithoutRepInput = {
   deal_id?: Prisma.StringFieldUpdateOperationsInput | string
   account_id?: Prisma.StringFieldUpdateOperationsInput | string
   stage?: Prisma.EnumDealStageFieldUpdateOperationsInput | $Enums.DealStage
-  amount?: Prisma.FloatFieldUpdateOperationsInput | number
+  amount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   closed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -918,7 +918,7 @@ export type $DealPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     account_id: string
     rep_id: string
     stage: $Enums.DealStage
-    amount: number
+    amount: number | null
     created_at: Date
     closed_at: Date | null
   }, ExtArgs["result"]["deal"]>

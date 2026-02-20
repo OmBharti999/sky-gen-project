@@ -40,21 +40,36 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 This project includes the following API endpoints:
 
 ### Summary
+
 - **Endpoint**: `/api/summary`
 - **Description**: Provides current quarter revenue, target, gap percentage, and quarter-over-quarter change.
 
 ### Revenue Drivers
+
 - **Endpoint**: `/api/drivers`
 - **Description**: Explains performance using pipeline size, win rate, average deal size, and sales cycle time.
 
 ### Risk Factors
+
 - **Endpoint**: `/api/risk-factors`
 - **Description**: Identifies stale deals, underperforming reps, and low-activity accounts.
 
 ### Recommendations
+
 - **Endpoint**: `/api/recommendations`
 - **Description**: Returns actionable suggestions to improve sales performance.
 
-
 <!-- Resources  -->
+
 https://mui.com/material-ui/integrations/nextjs/
+
+<!-- Steps To replicate Database -->
+
+// target
+// rep
+// account
+// deal
+// activity
+
+Renamed some enums
+'Mid-Market' => MidMarket, 'Closed Won' => ClosedWon and 'Closed Lost' is named as ClosedLost
