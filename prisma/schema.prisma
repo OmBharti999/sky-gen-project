@@ -6,3 +6,131 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum ActivityType {
+  demo
+  call
+  email
+}
+
+enum Segment {
+  SMB
+  // Mid-Market
+  MidMarket
+  Enterprise
+}
+
+// [ 'Closed Won', 'Prospecting', 'Negotiation', 'Closed Lost' ]
+enum DealStage {
+  ClosedWon
+  Prospecting
+  Negotiation
+  ClosedLost
+}
+
+// [ 'SaaS', 'Ecommerce', 'FinTech', 'EdTech', 'Healthcare' ]
+enum Industry {
+  SaaS
+  Ecommerce
+  FinTech
+  EdTech
+  Healthcare
+}
+
+// {
+//     "account_id": "A1",
+//     "name": "Company_1",
+//     "industry": "SaaS",
+//     "segment": "SMB"
+//   }
+
+model Account {
+  id         Int      @id @default(autoincrement())
+  account_id String   @unique
+  name       String
+  industry   Industry
+  segment    Segment
+  deals      Deal[]
+
+  @@index([account_id])
+}
+
+// {
+//     "activity_id": "ACT1",
+//     "deal_id": "D182",
+//     "type": "email",
+//     "timestamp": "2025-11-11"
+//   },
+
+model Activity {
+  id          Int          @id @default(autoincrement())
+  activity_id String       @unique
+  deal_id     String
+  Deal        Deal         @relation(fields: [deal_id], references: [deal_id])
+  type        ActivityType
+  timestamp   DateTime
+
+  @@index([activity_id])
+}
+
+//  {
+//     "deal_id": "D1",
+//     "account_id": "A85",
+//     "rep_id": "R7",
+//     "stage": "Closed Won",
+//     "amount": 60519,
+//     "created_at": "2025-04-08",
+//     "closed_at": null
+//   },
+//   {
+//     "deal_id": "D2",
+//     "account_id": "A87",
+//     "rep_id": "R11",
+//     "stage": "Prospecting",
+//     "amount": 12944,
+//     "created_at": "2025-08-28",
+//     "closed_at": "2025-09-13"
+//   },
+
+model Deal {
+  id         Int        @id @default(autoincrement())
+  deal_id    String     @unique
+  account_id String
+  Account    Account    @relation(fields: [account_id], references: [account_id])
+  rep_id     String
+  Rep        Rep        @relation(fields: [rep_id], references: [rep_id])
+  stage      DealStage
+  amount     Float
+  created_at DateTime
+  closed_at  DateTime?
+  activities Activity[]
+
+  @@index([deal_id])
+}
+
+// {
+//     "rep_id": "R1",
+//     "name": "Ankit"
+//   },
+
+model Rep {
+  id     Int    @id @default(autoincrement())
+  rep_id String @unique
+  name   String
+  deals  Deal[]
+
+  @@index([rep_id])
+}
+
+//   {
+//   "month": "2025-01",
+//   "target": 181715
+// },
+
+model Target {
+  id     Int    @id @default(autoincrement())
+  month  String @unique
+  target Float
+
+  @@index([month])
+}
