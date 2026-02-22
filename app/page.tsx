@@ -8,11 +8,13 @@ import {
   TopRiskFactors,
 } from "./_components";
 import { getSummaryData } from "./_services/summaryService";
+import { getDriversData } from "./_services/driverService";
 import { CURRENT_QUARTER_NAME } from "./constants";
 
 export default async function Home() {
   const summaryData = await getSummaryData(CURRENT_QUARTER_NAME);
   console.log("🚀 ~ Home ~ summaryData:", summaryData);
+  const driversData = await getDriversData(CURRENT_QUARTER_NAME);
   return (
     <>
       <Header />

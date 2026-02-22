@@ -1,4 +1,5 @@
 import { prisma } from "@/app/_lib/prisma";
+import { DriversApiResponse } from "@/app/_types";
 import { FINANCIAL_QUARTERS } from "@/app/constants";
 import { DealStage } from "@/generated/prisma/enums";
 import { daDK } from "@mui/material/locale";
@@ -295,7 +296,7 @@ export async function GET(request: Request) {
   };
   // ── Response ───────────────────────────────────────────────────────────────
 
-  return NextResponse.json({
+  return NextResponse.json<DriversApiResponse>({
     data: responseData,
     status: "success",
   });
