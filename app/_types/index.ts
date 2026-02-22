@@ -9,6 +9,7 @@ export interface SummaryData {
   quaterlyTarget: number;
   quarter: Quarter;
   percentageToGoal: number | null;
+  qoqChange: number | null;
 }
 
 export interface SummaryApiResponse {

@@ -16,14 +16,20 @@ export async function GET(request: Request) {
     );
   }
 
-  const quarter = FINANCIAL_QUARTERS.find((q) => q.name === quarterName);
+  const quarterIndex = FINANCIAL_QUARTERS.findIndex(
+    (q) => q.name === quarterName,
+  );
 
-  if (!quarter) {
+  if (quarterIndex === -1) {
     return NextResponse.json(
       { error: "Invalid quarter name" },
       { status: 400 },
     );
   }
+
+  const quarter = FINANCIAL_QUARTERS[quarterIndex];
+  const prevQuarter =
+    quarterIndex > 0 ? FINANCIAL_QUARTERS[quarterIndex - 1] : null;
 
   // Fetch Quarterly Revenue
   const revenue = await prisma.deal.findMany({
@@ -47,6 +53,37 @@ export async function GET(request: Request) {
     (acc, deal) => acc + (deal?.amount || 0),
     0,
   );
+
+  // Fetch Previous Quarter Revenue for QoQ Change
+  let prevQuarterRevenue = 0;
+  if (prevQuarter) {
+    const prevRevenue = await prisma.deal.findMany({
+      where: {
+        created_at: {
+          gte: new Date(prevQuarter.startDate),
+          lte: new Date(prevQuarter.endDate),
+        },
+        closed_at: {
+          gte: new Date(prevQuarter.startDate),
+          lte: new Date(prevQuarter.endDate),
+          not: null,
+        },
+      },
+      select: {
+        amount: true,
+      },
+    });
+    prevQuarterRevenue = prevRevenue.reduce(
+      (acc, deal) => acc + (deal?.amount || 0),
+      0,
+    );
+  }
+
+  // Calculate QoQ Change
+  const qoqChange = percentageToGoalCalculator({
+    revenue: quaterlyRevenue,
+    target: prevQuarterRevenue,
+  });
 
   // Fetch Quarterly Target
   const target = await prisma.target.findMany();
@@ -72,6 +109,7 @@ export async function GET(request: Request) {
       quaterlyTarget,
       quarter,
       percentageToGoal,
+      qoqChange,
     },
     status: "success",
   });
