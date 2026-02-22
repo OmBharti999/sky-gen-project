@@ -1,4 +1,6 @@
 import { prisma } from "@/app/_lib/prisma";
+import { percentageToGoalCalculator } from "@/app/_lib/utils";
+import { SummaryApiResponse } from "@/app/_types";
 import { FINANCIAL_QUARTERS } from "@/app/constants";
 import { NextResponse } from "next/server";
 
@@ -40,11 +42,17 @@ export async function GET() {
     return acc;
   }, 0);
 
-  return NextResponse.json({
+  const percentageToGoal = percentageToGoalCalculator({
+    revenue: quaterlyRevenue,
+    target: quaterlyTarget,
+  });
+
+  return NextResponse.json<SummaryApiResponse>({
     data: {
       quaterlyRevenue,
       quaterlyTarget,
       currentQuarter,
+      percentageToGoal,
     },
     status: "success",
   });

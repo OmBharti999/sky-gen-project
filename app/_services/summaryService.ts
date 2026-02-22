@@ -1,23 +1,7 @@
-import { SUMMARY_API_URL } from "../constants";
+import { SummaryApiResponse } from "@/app/_types";
+import { SUMMARY_API_URL } from "@/app/constants";
 
-interface Quarter {
-  name: string;
-  startDate: Date;
-  endDate: Date;
-}
-
-interface SummaryData {
-  quaterlyRevenue: number;
-  quaterlyTarget: number;
-  currentQuarter: Quarter;
-}
-
-interface ApiResponse {
-  data: SummaryData;
-  status: string;
-}
-
-export async function getSummaryData(): Promise<ApiResponse | null> {
+export async function getSummaryData(): Promise<SummaryApiResponse | null> {
   try {
     const response = await fetch(SUMMARY_API_URL);
     const data = await response.json();

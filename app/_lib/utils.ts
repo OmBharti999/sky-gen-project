@@ -11,6 +11,19 @@ export const percentageChangeCalculator = ({
   return ((current - previous) / previous) * 100;
 };
 
+export const percentageToGoalCalculator = ({
+  revenue,
+  target,
+}: {
+  revenue: number | null;
+  target: number | null;
+}) => {
+  if (!target || revenue === null) {
+    return null;
+  }
+  return +(((revenue - target) / target) * 100).toFixed(2);
+};
+
 /**
  * Calculate the percentage of goal achievement
  * given a revenue and a target
@@ -29,5 +42,5 @@ export const percentageGoalAchievementCalculator = ({
   if (!target || revenue === null) {
     return null;
   }
-  return +(((revenue / target) * 100).toFixed(2));
+  return +((revenue / target) * 100).toFixed(2);
 };

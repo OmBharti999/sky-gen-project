@@ -8,8 +8,6 @@ import {
   TopRiskFactors,
 } from "./_components";
 import { getSummaryData } from "./_services/summaryService";
-// index.ts
-// Query your database using the Accelerate Client extension
 
 export default async function Home() {
   const summaryData = await getSummaryData();
