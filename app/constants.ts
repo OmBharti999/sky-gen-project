@@ -31,3 +31,4 @@ export const CURRENT_QUARTER_NAME = FINANCIAL_QUARTERS[1].name; // Assuming curr
 export const NEXT_APP_URL = process.env.NEXT_APP_URL || "http://localhost:3000";
 export const SUMMARY_API_URL = `${NEXT_APP_URL}/api/summary`;
 export const DRIVERS_API_URL = `${NEXT_APP_URL}/api/drivers`;
+export const REVENUE_TREND_API_URL = `${NEXT_APP_URL}/api/revenue-trend`;

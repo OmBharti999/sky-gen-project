@@ -10,10 +10,12 @@ import {
 import { getSummaryData } from "./_services/summaryService";
 import { getDriversData } from "./_services/driverService";
 import { CURRENT_QUARTER_NAME } from "./constants";
+import { getRevenueTrendData } from "./_services/revenueTrendService";
 
 export default async function Home() {
   const summaryData = await getSummaryData(CURRENT_QUARTER_NAME);
   const driversData = await getDriversData(CURRENT_QUARTER_NAME);
+  const revenueTrendData = await getRevenueTrendData(6);
   return (
     <>
       <Header />
@@ -66,14 +68,7 @@ export default async function Home() {
                 {/* Revenue Trend Chart – now below the two right cards */}
                 <Grid size={12}>
                   <RevenueTrendChart
-                    data={[
-                      { month: "Oct", revenue: 35, target: 22 },
-                      { month: "Nov", revenue: 40, target: 38 },
-                      { month: "Dec", revenue: 37, target: 43 },
-                      { month: "Jan", revenue: 45, target: 39 },
-                      { month: "Feb", revenue: 38, target: 42 },
-                      { month: "Mar", revenue: 46, target: 52 },
-                    ]}
+                    data={revenueTrendData?.data || []}
                   />
                 </Grid>
               </Grid>

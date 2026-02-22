@@ -41,3 +41,16 @@ export interface DriversApiResponse {
   data: DriversData;
   status: "success";
 }
+
+// ── Revenue Trend API types ─────────────────────────────────────────────────
+export interface RevenueTrendDataPoint {
+  month: string;
+  revenue: number | null;
+  prevRevenue: number | null;
+  target: number | null;
+}
+
+export interface RevenueTrendApiResponse {
+  data: RevenueTrendDataPoint[];
+  status: "success";
+}
