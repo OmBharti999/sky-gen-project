@@ -69,3 +69,16 @@ export interface RiskFactorsApiResponse {
   data?: RiskFactor[];
   error?: string;
 }
+
+// ── Recommendations API types ────────────────────────────────────────────────
+export interface Recommendation {
+  id: string;
+  action: string;
+  detail: string;
+}
+
+export interface RecommendationsApiResponse {
+  status: "success" | "error";
+  data?: Recommendation[];
+  error?: string;
+}

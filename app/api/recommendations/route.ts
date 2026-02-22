@@ -1,40 +1,130 @@
-import deals from '../../_data/deals.json';
-import reps from '../../_data/reps.json';
-import accounts from '../../_data/accounts.json';
-import activities from '../../_data/activities.json';
+import { NextResponse } from "next/server";
+import { prisma } from "@/app/_lib/prisma";
+import { subDays } from "date-fns";
+import { FINANCIAL_QUARTERS } from "@/app/constants";
+import type { RecommendationsApiResponse } from "@/app/_types";
 
-function parseDate(s: any) { if (!s) return null; const d = new Date(s); return isNaN(d.getTime()) ? null : d }
-function getAmount(d: any): number { return Number(d.amount ?? d.value ?? d.deal_amount ?? 0) || 0 }
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const quarterName = searchParams.get("quarter");
 
-export async function GET() {
-  const now = new Date();
-  const staleDeals = deals.filter((d: any) => !d.closed_at && (() => {
-    const c = parseDate(d.created_at ?? d.opened_at ?? d.createdAt);
-    if (!c) return false;
-    return ((now.getTime() - c.getTime()) / (1000*60*60*24)) > 30;
-  })());
+    // Validate quarter name
+    if (!quarterName) {
+      return NextResponse.json(
+        { error: "Quarter parameter is required" },
+        { status: 400 },
+      );
+    }
 
-  // low win-rate reps (best effort)
-  const repStats: any = {};
-  reps.forEach((r: any) => repStats[r.rep_id ?? r.id ?? r.name] = { rep: r, closed: 0, won: 0 });
-  deals.forEach((d: any) => {
-    const rid = d.rep_id ?? d.repId ?? d.owner_id ?? d.owner;
-    if (!rid) return;
-    if (!repStats[rid]) repStats[rid] = { rep: { rep_id: rid }, closed: 0, won: 0 };
-    if (d.closed_at) { repStats[rid].closed += 1; repStats[rid].won += (d.is_won ? 1 : 1); }
-  });
-  const repList = Object.values(repStats).map((s: any) => ({ rep: s.rep, winRate: s.closed ? (s.won / s.closed) * 100 : null }));
-  repList.sort((a: any, b: any) => (a.winRate ?? 0) - (b.winRate ?? 0));
+    const quarterIndex = FINANCIAL_QUARTERS.findIndex(
+      (q) => q.name === quarterName,
+    );
 
-  const actByAccount: any = {};
-  activities.forEach((a: any) => { const aid = a.account_id ?? a.accountId ?? a.account; if (!aid) return; actByAccount[aid] = (actByAccount[aid] || 0) + 1; });
-  const lowActivity = accounts.filter((acc: any) => (actByAccount[acc.account_id] || 0) < 2).slice(0, 10);
+    if (quarterIndex === -1) {
+      return NextResponse.json(
+        { error: "Invalid quarter name" },
+        { status: 400 },
+      );
+    }
 
-  const recs: string[] = [];
-  if (staleDeals.length) recs.push(`Focus on ${Math.min(staleDeals.length,5)} stale deals older than 30 days`);
-  if (repList.length) recs.push(`Coach low-win-rate reps: ${repList.slice(0,3).map((r:any)=>r.rep.name||r.rep.rep_id).join(', ')}`);
-  if (lowActivity.length) recs.push(`Increase activity for ${Math.min(lowActivity.length,3)} low-activity accounts`);
-  if (recs.length < 3) recs.push('Review pipeline qualification criteria');
+    const quarter = FINANCIAL_QUARTERS[quarterIndex];
 
-  return new Response(JSON.stringify({ recommendations: recs }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    const now = new Date(quarter.startDate);
+    const thirtyDaysAgo = subDays(now, 30);
+    const fourteenDaysAgo = subDays(now, 14);
+
+    // 1. Data Retrieval for Dynamic Logic
+    const staleEnterpriseCount = await prisma.deal.count({
+      where: {
+        stage: { in: ["Prospecting", "Negotiation"] },
+        created_at: { lt: thirtyDaysAgo },
+        Account: { segment: "Enterprise" },
+      },
+    });
+
+    const reps = await prisma.rep.findMany({
+      include: {
+        deals: { select: { stage: true } },
+      },
+    });
+
+    const accountsWithNoActivity = await prisma.account.findMany({
+      where: {
+        deals: {
+          every: {
+            activities: {
+              none: { timestamp: { gt: fourteenDaysAgo } },
+            },
+          },
+        },
+      },
+      select: { segment: true },
+    });
+
+    // 2. Recommendation Logic
+    const recommendations = [];
+
+    // Suggestion for Stale Deals
+    if (staleEnterpriseCount > 0) {
+      recommendations.push({
+        id: "rec-1",
+        action: "Focus on aging deals in Enterprise segment",
+        detail: `There are ${staleEnterpriseCount} high-value deals stuck for over 30 days.`,
+      });
+    }
+
+    // Suggestion for Coaching (Finding rep with lowest win rate)
+    const repStats = reps
+      .map((rep) => {
+        const won = rep.deals.filter((d) => d.stage === "ClosedWon").length;
+        const total = rep.deals.filter((d) =>
+          ["ClosedWon", "ClosedLost"].includes(d.stage),
+        ).length;
+        return {
+          name: rep.name,
+          winRate: total > 0 ? (won / total) * 100 : 100,
+        };
+      })
+      .sort((a, b) => a.winRate - b.winRate);
+
+    if (repStats.length > 0 && repStats[0].winRate < 20) {
+      recommendations.push({
+        id: "rec-2",
+        action: `Coach ${repStats[0].name} to improve closing skills`,
+        detail: `Current win rate is ${Math.round(repStats[0].winRate)}%, which is below target.`,
+      });
+    }
+
+    // Suggestion for Inactive Accounts
+    if (accountsWithNoActivity.length > 0) {
+      const segmentCounts = accountsWithNoActivity.reduce((acc: any, curr) => {
+        acc[curr.segment] = (acc[curr.segment] || 0) + 1;
+        return acc;
+      }, {});
+
+      const topInactiveSegment = Object.keys(segmentCounts).reduce((a, b) =>
+        segmentCounts[a] > segmentCounts[b] ? a : b,
+      );
+
+      recommendations.push({
+        id: "rec-3",
+        action: "Increase outreach to inactive accounts",
+        detail: `Target the ${topInactiveSegment} segment specifically, as it has the highest concentration of silent accounts.`,
+      });
+    }
+
+    const response: RecommendationsApiResponse = {
+      status: "success",
+      data: recommendations,
+    };
+    return NextResponse.json<RecommendationsApiResponse>(response);
+  } catch (error) {
+    console.error("Recommendations API Error:", error);
+    const response: RecommendationsApiResponse = {
+      status: "error",
+      error: "Internal Server Error",
+    };
+    return NextResponse.json<RecommendationsApiResponse>(response, { status: 500 });
+  }
 }

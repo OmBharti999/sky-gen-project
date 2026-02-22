@@ -33,3 +33,4 @@ export const SUMMARY_API_URL = `${NEXT_APP_URL}/api/summary`;
 export const DRIVERS_API_URL = `${NEXT_APP_URL}/api/drivers`;
 export const REVENUE_TREND_API_URL = `${NEXT_APP_URL}/api/revenue-trend`;
 export const RISK_FACTORS_API_URL = `${NEXT_APP_URL}/api/risk-factors`;
+export const RECOMMENDATIONS_API_URL = `${NEXT_APP_URL}/api/recommendations`;
