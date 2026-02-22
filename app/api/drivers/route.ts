@@ -1,4 +1,5 @@
 import { prisma } from "@/app/_lib/prisma";
+import { percentageToGoalCalculator } from "@/app/_lib/utils";
 import { DriversApiResponse } from "@/app/_types";
 import { FINANCIAL_QUARTERS } from "@/app/constants";
 import { DealStage } from "@/generated/prisma/enums";
@@ -38,12 +39,6 @@ function getMonthlyBuckets(start: Date, end: Date) {
   }
 
   return buckets;
-}
-
-/** Percentage change from prev to current. Returns null when prev is 0 or missing. */
-function pctChange(current: number, prev: number | null): number | null {
-  if (prev === null || prev === 0) return null;
-  return ((current - prev) / prev) * 100;
 }
 
 /** Average days between created_at and closed_at for a set of deals. */
@@ -262,7 +257,7 @@ export async function GET(request: Request) {
       // Total open pipeline value in dollars
       value: pipelineValue,
       // Relative % change vs previous quarter (e.g. +12 → "+12%")
-      delta: pctChange(pipelineValue, prevPipelineValue),
+      delta: percentageToGoalCalculator({revenue: pipelineValue, target: prevPipelineValue}),
       // 3 monthly data points for sparkline
       sparkline: pipelineSparkline,
     },
@@ -279,7 +274,7 @@ export async function GET(request: Request) {
       // Raw dollars
       value: avgDealSizeValue,
       // Relative % change (e.g. +3 → "+3%")
-      delta: pctChange(avgDealSizeValue, prevAvgDealSize),
+      delta: percentageToGoalCalculator({revenue: avgDealSizeValue, target: prevAvgDealSize}),
       sparkline: avgDealSizeSparkline,
     },
 
