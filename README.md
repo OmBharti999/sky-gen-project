@@ -59,6 +59,24 @@ This project includes the following API endpoints:
 - **Endpoint**: `/api/recommendations`
 - **Description**: Returns actionable suggestions to improve sales performance.
 
+### Revenue Trends
+
+- **Endpoint**: `/api/revenue-trend`
+- **Description**: Returns the last N calendar months of revenue (closed won deals), the same month(s) from the previous year for YoY comparison, and the monthly targets. Useful for building sparkline charts and month-over-month trend views.
+- **Query params**:
+  - `months` (optional): number of months to return (1-12). Defaults to `6`.
+- **Response shape**:
+  ```json
+  {
+    "data": [
+      { "month": "Oct", "revenue": 35000, "prevRevenue": 32000, "target": 40000 },
+      ...
+    ],
+    "status": "success"
+  }
+  ```
+
+
 <!-- Resources  -->
 
 https://mui.com/material-ui/integrations/nextjs/
