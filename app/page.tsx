@@ -12,12 +12,14 @@ import { getDriversData } from "./_services/driverService";
 import { CURRENT_QUARTER_NAME } from "./constants";
 import { getRevenueTrendData } from "./_services/revenueTrendService";
 import { getRiskFactorsData } from "./_services/riskFactorsService";
+import { getRecommendationsData } from "./_services/recommendationsService";
 
 export default async function Home() {
   const summaryData = await getSummaryData(CURRENT_QUARTER_NAME);
   const driversData = await getDriversData(CURRENT_QUARTER_NAME);
   const revenueTrendData = await getRevenueTrendData({quarter: CURRENT_QUARTER_NAME, previousMonths: 6});
   const riskFactorsData = await getRiskFactorsData(CURRENT_QUARTER_NAME);
+  const recommendationsData = await getRecommendationsData(CURRENT_QUARTER_NAME);
   return (
     <>
       <Header />
@@ -49,17 +51,7 @@ export default async function Home() {
                   />
                   {/* Recommended Actions */}
                   <RecommendedActions
-                    items={[
-                      {
-                        id: 1,
-                        text: "Focus on aging deals in Enterprise segment",
-                      },
-                      { id: 2, text: "Coach Ankit to improve closing skills" },
-                      {
-                        id: 3,
-                        text: "Increase outreach to inactive accounts",
-                      },
-                    ]}
+                    items={recommendationsData?.data || []}
                   />
                 </Grid>
 
