@@ -29,9 +29,9 @@ function monthKey(year: number, month: number) {
  * Returns the last N calendar months (oldest → newest).
  * e.g. today = Mar 2026, n = 6 → [Oct 25, Nov 25, Dec 25, Jan 26, Feb 26, Mar 26]
  */
-function getLastNMonths(n: number) {
+function getLastNMonths({ n, quarter }: { n: number; quarter: string }) {
   const startDate = FINANCIAL_QUARTERS.find(
-    (q) => q.name === CURRENT_QUARTER_NAME,
+    (q) => q.name === quarter,
   )?.startDate;
   const now = new Date(startDate!);
   const result: { year: number; month: number }[] = [];
@@ -64,6 +64,22 @@ function revenueInWindow(
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
+  const quarterName = searchParams.get("quarter");
+  if (!quarterName) {
+    return NextResponse.json(
+      { error: "Quarter parameter is required" },
+      { status: 400 },
+    );
+  }
+
+  const quarter = FINANCIAL_QUARTERS.find((q) => q.name === quarterName);
+  if (!quarter) {
+    return NextResponse.json(
+      { error: "Invalid quarter name" },
+      { status: 400 },
+    );
+  }
+
   const monthsBack = Math.min(
     parseInt(searchParams.get("months") ?? "6", 10),
     12,
@@ -76,7 +92,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const buckets = getLastNMonths(monthsBack);
+  const buckets = getLastNMonths({ n: monthsBack, quarter: quarterName });
 
   // Window covering current months + same months 1 year prior (for prevRevenue)
   const currentWindowStart = getMonthBounds(

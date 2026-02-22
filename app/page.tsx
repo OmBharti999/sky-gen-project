@@ -15,7 +15,7 @@ import { getRevenueTrendData } from "./_services/revenueTrendService";
 export default async function Home() {
   const summaryData = await getSummaryData(CURRENT_QUARTER_NAME);
   const driversData = await getDriversData(CURRENT_QUARTER_NAME);
-  const revenueTrendData = await getRevenueTrendData(6);
+  const revenueTrendData = await getRevenueTrendData({quarter: CURRENT_QUARTER_NAME, previousMonths: 6});
   return (
     <>
       <Header />
