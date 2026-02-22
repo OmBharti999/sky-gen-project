@@ -1,3 +1,5 @@
+import { FINANCIAL_QUARTERS } from "../constants";
+
 export interface Quarter {
   name: string;
   startDate: Date;
@@ -82,3 +84,6 @@ export interface RecommendationsApiResponse {
   data?: Recommendation[];
   error?: string;
 }
+
+export type QuarterName = (typeof FINANCIAL_QUARTERS)[number]["name"];
+// → "Q0 2025" | "Q1 2025" | "Q2 2025" | "Q3 2025" | "Q4 2026"

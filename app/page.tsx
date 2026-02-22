@@ -9,17 +9,40 @@ import {
 } from "./_components";
 import { getSummaryData } from "./_services/summaryService";
 import { getDriversData } from "./_services/driverService";
-import { CURRENT_QUARTER_NAME } from "./constants";
+import { CURRENT_QUARTER_NAME, FINANCIAL_QUARTERS } from "./constants";
 import { getRevenueTrendData } from "./_services/revenueTrendService";
 import { getRiskFactorsData } from "./_services/riskFactorsService";
 import { getRecommendationsData } from "./_services/recommendationsService";
+import type { QuarterName } from "./_types";
 
-export default async function Home() {
-  const summaryData = await getSummaryData(CURRENT_QUARTER_NAME);
-  const driversData = await getDriversData(CURRENT_QUARTER_NAME);
-  const revenueTrendData = await getRevenueTrendData({quarter: CURRENT_QUARTER_NAME, previousMonths: 6});
-  const riskFactorsData = await getRiskFactorsData(CURRENT_QUARTER_NAME);
-  const recommendationsData = await getRecommendationsData(CURRENT_QUARTER_NAME);
+type HomeProps = {
+  searchParams: Promise<{ quarter?: string }>;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
+  const { quarter: quarterParam } = await searchParams;
+
+  // Validate the query param against known quarters — fall back to current
+  const quarter: QuarterName = FINANCIAL_QUARTERS.some(
+    (q) => q.name === quarterParam,
+  )
+    ? (quarterParam as QuarterName)
+    : CURRENT_QUARTER_NAME;
+
+  const [
+    summaryData,
+    driversData,
+    revenueTrendData,
+    riskFactorsData,
+    recommendationsData,
+  ] = await Promise.all([
+    getSummaryData(quarter),
+    getDriversData(quarter),
+    getRevenueTrendData({ quarter, previousMonths: 6 }),
+    getRiskFactorsData(quarter),
+    getRecommendationsData(quarter),
+  ]);
+
   return (
     <>
       <Header />
@@ -31,35 +54,23 @@ export default async function Home() {
             percentageToGoal={summaryData?.data?.percentageToGoal}
           />
 
-          {/* Two‑column layout on desktop */}
           <Grid container spacing={3} sx={{ mt: 2 }}>
-            {/* Left column – Revenue Drivers (always on top on mobile) */}
             <Grid size={{ xs: 12, md: 4 }}>
               <RevenueDriversCard driversData={driversData?.data || null} />
             </Grid>
 
-            {/* Right column – contains two cards + chart stacked */}
             <Grid size={{ xs: 12, md: 8 }}>
               <Grid container direction="column" spacing={3}>
-                {/* Top Risk Factors */}
                 <Grid
                   size={12}
                   sx={{ display: "flex", flexDirection: "row", gap: 4 }}
                 >
-                  <TopRiskFactors
-                    items={riskFactorsData?.data || []}
-                  />
-                  {/* Recommended Actions */}
-                  <RecommendedActions
-                    items={recommendationsData?.data || []}
-                  />
+                  <TopRiskFactors items={riskFactorsData?.data || []} />
+                  <RecommendedActions items={recommendationsData?.data || []} />
                 </Grid>
 
-                {/* Revenue Trend Chart – now below the two right cards */}
                 <Grid size={12}>
-                  <RevenueTrendChart
-                    data={revenueTrendData?.data || []}
-                  />
+                  <RevenueTrendChart data={revenueTrendData?.data || []} />
                 </Grid>
               </Grid>
             </Grid>
