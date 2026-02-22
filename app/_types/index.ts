@@ -54,3 +54,18 @@ export interface RevenueTrendApiResponse {
   data: RevenueTrendDataPoint[];
   status: "success";
 }
+
+// ── Risk Factors API types ──────────────────────────────────────────────────
+export type RiskSeverity = "high" | "medium" | "low";
+
+export interface RiskFactor {
+  id: string;
+  label: string;
+  severity: RiskSeverity;
+}
+
+export interface RiskFactorsApiResponse {
+  status: "success" | "error";
+  data?: RiskFactor[];
+  error?: string;
+}

@@ -1,10 +1,36 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/_lib/prisma";
 import { subDays } from "date-fns";
+import type { RiskFactorsApiResponse } from "@/app/_types";
+import { FINANCIAL_QUARTERS } from "@/app/constants";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const now = new Date();
+    const { searchParams } = new URL(request.url);
+    const quarterName = searchParams.get("quarter");
+
+    // Validate quarter name
+    if (!quarterName) {
+      return NextResponse.json(
+        { error: "Quarter parameter is required" },
+        { status: 400 },
+      );
+    }
+
+    const quarterIndex = FINANCIAL_QUARTERS.findIndex(
+      (q) => q.name === quarterName,
+    );
+
+    if (quarterIndex === -1) {
+      return NextResponse.json(
+        { error: "Invalid quarter name" },
+        { status: 400 },
+      );
+    }
+
+    const quarter = FINANCIAL_QUARTERS[quarterIndex];
+
+    const now = new Date(quarter.startDate);
     const thirtyDaysAgo = subDays(now, 30);
     const fourteenDaysAgo = subDays(now, 14);
 
@@ -27,7 +53,8 @@ export async function GET() {
     const won = ankitDeals.filter((d) => d.stage === "ClosedWon").length;
     const lost = ankitDeals.filter((d) => d.stage === "ClosedLost").length;
     const totalClosed = won + lost;
-    const ankitWinRate = totalClosed > 0 ? Math.round((won / totalClosed) * 100) : 0;
+    const ankitWinRate =
+      totalClosed > 0 ? Math.round((won / totalClosed) * 100) : 0;
 
     // 3. Low Activity Accounts (No activity in last 14 days)
     const lowActivityAccountsCount = await prisma.account.count({
@@ -44,7 +71,7 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({
+    const response: RiskFactorsApiResponse = {
       status: "success",
       data: [
         {
@@ -63,12 +90,14 @@ export async function GET() {
           severity: "low",
         },
       ],
-    });
+    };
+    return NextResponse.json<RiskFactorsApiResponse>(response);
   } catch (error) {
     console.error("Risk Factor API Error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error", status: "error" },
-      { status: 500 }
-    );
+    const response: RiskFactorsApiResponse = {
+      status: "error",
+      error: "Internal Server Error",
+    };
+    return NextResponse.json<RiskFactorsApiResponse>(response, { status: 500 });
   }
 }

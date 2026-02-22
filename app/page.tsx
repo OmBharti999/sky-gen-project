@@ -11,11 +11,13 @@ import { getSummaryData } from "./_services/summaryService";
 import { getDriversData } from "./_services/driverService";
 import { CURRENT_QUARTER_NAME } from "./constants";
 import { getRevenueTrendData } from "./_services/revenueTrendService";
+import { getRiskFactorsData } from "./_services/riskFactorsService";
 
 export default async function Home() {
   const summaryData = await getSummaryData(CURRENT_QUARTER_NAME);
   const driversData = await getDriversData(CURRENT_QUARTER_NAME);
   const revenueTrendData = await getRevenueTrendData({quarter: CURRENT_QUARTER_NAME, previousMonths: 6});
+  const riskFactorsData = await getRiskFactorsData(CURRENT_QUARTER_NAME);
   return (
     <>
       <Header />
@@ -43,11 +45,7 @@ export default async function Home() {
                   sx={{ display: "flex", flexDirection: "row", gap: 4 }}
                 >
                   <TopRiskFactors
-                    items={[
-                      { id: 1, text: "23 Enterprise deals stuck over 30 days" },
-                      { id: 2, text: "Rep Ankit – Win Rate: 11%" },
-                      { id: 3, text: "15 Accounts with no recent activity" },
-                    ]}
+                    items={riskFactorsData?.data || []}
                   />
                   {/* Recommended Actions */}
                   <RecommendedActions

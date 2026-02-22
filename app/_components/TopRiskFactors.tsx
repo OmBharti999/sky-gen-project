@@ -7,15 +7,11 @@ import {
   Stack,
   Box,
 } from "@mui/material";
-
-type RiskItem = {
-  id: number;
-  text: string;
-};
+import { RiskFactor } from "@/app/_types";
 
 type TopRiskFactorsProps = {
   title?: string;
-  items: RiskItem[];
+  items: RiskFactor[];
 };
 
 export const TopRiskFactors: React.FC<TopRiskFactorsProps> = ({
@@ -55,7 +51,7 @@ export const TopRiskFactors: React.FC<TopRiskFactorsProps> = ({
                 />
 
                 <Typography variant="body2" fontWeight={500}>
-                  {item.text}
+                  {item.label}
                 </Typography>
               </Box>
 
