@@ -6,6 +6,7 @@ interface Props {
   label?: string;
   revenue: number;
   target: number;
+  percentageToGoal?: number | null;
 }
 
 /**
@@ -21,11 +22,8 @@ export const SummaryBanner = ({
   label = "QTD Revenue",
   revenue,
   target,
+  percentageToGoal
 }: Props) => {
-  const percentage = percentageGoalAchievementCalculator({
-    revenue,
-    target,
-  });
 
   return (
     <Box
@@ -64,14 +62,14 @@ export const SummaryBanner = ({
       </Typography>
 
       {/* Percentage */}
-      {percentage ? (
+      {percentageToGoal ? (
         <Typography
           variant="h6"
           ml={3}
           fontWeight={600}
-          color={percentage < 0 ? "error.main" : "success.main"}
+          color={percentageToGoal < 0 ? "error.main" : "success.main"}
         >
-          {percentage}% to Goal
+          {percentageToGoal}% to Goal
         </Typography>
       ) : null}
     </Box>

@@ -17,7 +17,7 @@ export default async function Home() {
       <Header />
       <Box sx={{ backgroundColor: "#f3f4f6", minHeight: "100vh", py: 4 }}>
         <Container maxWidth="xl">
-          <SummaryBanner revenue={summaryData?.data?.quaterlyRevenue || 0} target={summaryData?.data?.quaterlyTarget || 0} />
+          <SummaryBanner revenue={summaryData?.data?.quaterlyRevenue || 0} target={summaryData?.data?.quaterlyTarget || 0} percentageToGoal={summaryData?.data?.percentageToGoal} />
 
           {/* Two‑column layout on desktop */}
           <Grid container spacing={3} sx={{ mt: 2 }}>
