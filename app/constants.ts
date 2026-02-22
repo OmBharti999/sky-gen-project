@@ -26,7 +26,7 @@ export const FINANCIAL_QUARTERS = [
   },
 ];
 
-export const CURRENT_QUARTER_NAME = FINANCIAL_QUARTERS[1].name; // Assuming current quarter is Q1 2025
+export const CURRENT_QUARTER_NAME = FINANCIAL_QUARTERS[4].name; // Assuming current quarter is Q1 2025
 
 export const NEXT_APP_URL = process.env.NEXT_APP_URL || "http://localhost:3000";
 export const SUMMARY_API_URL = `${NEXT_APP_URL}/api/summary`;

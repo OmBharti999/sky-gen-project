@@ -4,6 +4,7 @@ import { prisma } from "@/app/_lib/prisma";
 import { DealStage } from "@/generated/prisma/enums";
 import { NextResponse } from "next/server";
 import type { RevenueTrendApiResponse } from "@/app/_types";
+import { CURRENT_QUARTER_NAME, FINANCIAL_QUARTERS } from "@/app/constants";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -29,7 +30,10 @@ function monthKey(year: number, month: number) {
  * e.g. today = Mar 2026, n = 6 → [Oct 25, Nov 25, Dec 25, Jan 26, Feb 26, Mar 26]
  */
 function getLastNMonths(n: number) {
-  const now = new Date();
+  const startDate = FINANCIAL_QUARTERS.find(
+    (q) => q.name === CURRENT_QUARTER_NAME,
+  )?.startDate;
+  const now = new Date(startDate!);
   const result: { year: number; month: number }[] = [];
 
   for (let i = n - 1; i >= 0; i--) {
@@ -44,10 +48,10 @@ function getLastNMonths(n: number) {
 function revenueInWindow(
   deals: { amount: number | null; closed_at: Date | null }[],
   start: Date,
-  end: Date
+  end: Date,
 ): number | null {
   const inWindow = deals.filter(
-    (d) => d.closed_at !== null && d.closed_at >= start && d.closed_at <= end
+    (d) => d.closed_at !== null && d.closed_at >= start && d.closed_at <= end,
   );
   // Return null when there is genuinely no data for that period
   // (e.g. prev-year month is before our dataset starts)
@@ -62,13 +66,13 @@ export async function GET(request: Request) {
 
   const monthsBack = Math.min(
     parseInt(searchParams.get("months") ?? "6", 10),
-    12
+    12,
   );
 
   if (isNaN(monthsBack) || monthsBack < 1) {
     return NextResponse.json(
       { error: "months must be a positive integer" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -77,11 +81,11 @@ export async function GET(request: Request) {
   // Window covering current months + same months 1 year prior (for prevRevenue)
   const currentWindowStart = getMonthBounds(
     buckets[0].year,
-    buckets[0].month
+    buckets[0].month,
   ).start;
   const currentWindowEnd = getMonthBounds(
     buckets[buckets.length - 1].year,
-    buckets[buckets.length - 1].month
+    buckets[buckets.length - 1].month,
   ).end;
 
   const prevWindowStart = new Date(currentWindowStart);
@@ -120,12 +124,15 @@ export async function GET(request: Request) {
     const { start: prevStart, end: prevEnd } = getMonthBounds(year - 1, month);
 
     return {
-      month: monthLabel(year, month),                          // "Oct"
-      revenue: revenueInWindow(wonDeals, start, end),          // current month, null if no deals
+      month: monthLabel(year, month), // "Oct"
+      revenue: revenueInWindow(wonDeals, start, end), // current month, null if no deals
       prevRevenue: revenueInWindow(wonDeals, prevStart, prevEnd), // same month last year, null if no data
-      target: targetMap.get(monthKey(year, month)) ?? null,    // monthly target, null if not set
+      target: targetMap.get(monthKey(year, month)) ?? null, // monthly target, null if not set
     };
   });
 
-  return NextResponse.json<RevenueTrendApiResponse>({ data, status: "success" });
+  return NextResponse.json<RevenueTrendApiResponse>({
+    data,
+    status: "success",
+  });
 }
