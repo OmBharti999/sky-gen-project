@@ -1,68 +1,101 @@
-import deals from '@/app/_data/deals.json';
+import { prisma } from "@/app/_lib/prisma";
+import { FINANCIAL_QUARTERS } from "@/app/constants";
+import { DealStage } from "@/generated/prisma/enums";
+import { NextResponse } from "next/server";
 
-interface Deal {
-  deal_id?: string;
-  account_id?: string;
-  rep_id?: string;
-  amount?: number | null;
-  value?: number;
-  deal_amount?: number;
-  created_at?: string;
-  opened_at?: string;
-  closed_at?: string | null;
-  is_won?: boolean;
-  status?: string;
-  stage?: string;
-}
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const quarterName = searchParams.get("quarter");
 
-function getAmount(deal: Deal): number {
-  return Number(deal.amount ?? deal.value ?? deal.deal_amount ?? 0) || 0;
-}
+  // Validate quarter name
+  if (!quarterName) {
+    return NextResponse.json(
+      { error: "Quarter parameter is required" },
+      { status: 400 },
+    );
+  }
 
-function parseDate(dateString: string | null | undefined): Date | null {
-  if (!dateString) return null;
-  const date = new Date(dateString);
-  return isNaN(date.getTime()) ? null : date;
-}
+  const quarter = FINANCIAL_QUARTERS.find((q) => q.name === quarterName);
 
-export async function GET() {
-  const pipelineSize = deals
-    .filter((deal: Deal) => !deal.closed_at)
-    .reduce((sum: number, deal: Deal) => sum + getAmount(deal), 0);
+  if (!quarter) {
+    return NextResponse.json(
+      { error: "Invalid quarter name" },
+      { status: 400 },
+    );
+  }
 
-  const closedDeals = deals
-    .filter((deal: Deal) => deal.closed_at)
-    .map((deal: Deal) => ({ ...deal, amount: getAmount(deal) }));
+  const pipeLineDeals = await prisma.deal.findMany({
+    where: {
+      closed_at: null,
+      stage: {
+        notIn: [DealStage.ClosedWon, DealStage.ClosedLost],
+      },
+    },
+    orderBy: {
+      created_at: "asc",
+    },
+  });
 
-  const winCount = closedDeals
-    .filter((deal: Deal) => deal.is_won || deal.status === 'won' || deal.stage === 'won')
-    .length;
+  // const pileLineDealsPreviousAggregate = await prisma.deal.aggregate({
+  //   where: {
+  //     closed_at: null,
+  //     stage: {
+  //       notIn: [DealStage.ClosedWon, DealStage.ClosedLost],
+  //     },
+  //     created_at: {
+  //       lte: quarter.startDate,
+  //     },
+  //   },
+  //   _count: true,
+  // });
+  //     }
 
-  const winRatePercent = closedDeals.length ? (winCount / closedDeals.length) * 100 : null;
+  const closedDeals = await prisma.deal.findMany({
+    where: {
+      stage: {
+        in: [DealStage.ClosedWon, DealStage.ClosedLost],
+      },
+      closed_at: {
+        gte: quarter.startDate,
+        lte: quarter.endDate,
+      },
+    },
+    orderBy: {
+      closed_at: "asc",
+    },
+  });
 
-  const averageDealSize = closedDeals.length
-    ? closedDeals.reduce((sum: number, deal: Deal) => sum + (deal.amount || 0), 0) / closedDeals.length
-    : null;
+  const allDeals = await prisma.deal.findMany({
+    where: {
+      created_at: {
+        gte: quarter.startDate,
+        lte: quarter.endDate,
+      },
+    },
+    orderBy: {
+      created_at: "asc",
+    },
+  });
 
-  const salesCycleDays = closedDeals
-    .map((deal: Deal) => {
-      const createdAt = parseDate(deal.created_at || deal.opened_at);
-      const closedAt = parseDate(deal.closed_at);
-      return createdAt && closedAt ? (closedAt.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24) : null;
-    })
-    .filter((days: number | null): days is number => days != null);
-
-  const averageSalesCycleDays = salesCycleDays.length
-    ? salesCycleDays.reduce((sum: number, days: number) => sum + days, 0) / salesCycleDays.length
-    : null;
+  const salesCycleDeals = await prisma.deal.findMany({
+    where: {
+      closed_at: {
+        gte: quarter.startDate,
+        lte: quarter.endDate,
+      },
+    },
+    orderBy: {
+      closed_at: "asc",
+    },
+  });
 
   return new Response(
     JSON.stringify({
-      pipelineSize,
-      winRatePercent,
-      averageDealSize,
-      averageSalesCycleDays,
+      pipeLineDeals,
+      closedDeals,
+      allDeals,
+      salesCycleDeals,
     }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
+    { status: 200, headers: { "Content-Type": "application/json" } },
   );
 }

@@ -73,3 +73,21 @@ https://mui.com/material-ui/integrations/nextjs/
 
 Renamed some enums
 'Mid-Market' => MidMarket, 'Closed Won' => ClosedWon and 'Closed Lost' is named as ClosedLost
+
+
+Pipeline usually means:
+👉 Open deals currently in pipeline
+NOT deals created in that quarter.
+
+If you filter by created_at, you might miss old open deals.
+
+Better logic for pipeline value:
+
+const pipeLineDeals = await prisma.deal.findMany({
+  where: {
+    closed_at: null,
+    stage: {
+      notIn: [DealStage.ClosedWon, DealStage.ClosedLost],
+    },
+  },
+});
