@@ -1,49 +1,74 @@
-import deals from '../../_data/deals.json';
-import reps from '../../_data/reps.json';
-import activities from '../../_data/activities.json';
-import accounts from '../../_data/accounts.json';
-
-function getAmount(d: any): number { return Number(d.amount ?? d.value ?? d.deal_amount ?? 0) || 0 }
-function parseDate(s: any) { if (!s) return null; const d = new Date(s); return isNaN(d.getTime()) ? null : d }
+import { NextResponse } from "next/server";
+import { prisma } from "@/app/_lib/prisma";
+import { subDays } from "date-fns";
 
 export async function GET() {
-  const now = new Date();
-  // Stale deals: open deals older than 30 days
-  const stale = deals.filter((d: any) => {
-    if (d.closed_at) return false;
-    const created = parseDate(d.created_at ?? d.opened_at ?? d.createdAt);
-    if (!created) return false;
-    const ageDays = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
-    return ageDays > 30;
-  }).map((d: any) => ({ deal: d, ageDays: Math.floor((now.getTime() - (parseDate(d.created_at ?? d.opened_at ?? d.createdAt) || now).getTime()) / (1000*60*60*24)) }));
+  try {
+    const now = new Date();
+    const thirtyDaysAgo = subDays(now, 30);
+    const fourteenDaysAgo = subDays(now, 14);
 
-  // Underperforming reps: win rate below 50% of average
-  const repStats: any = {};
-  reps.forEach((r: any) => { repStats[r.rep_id || r.id || r.repId || r.name] = { rep: r, closed: 0, won: 0, revenue: 0 } });
-  deals.forEach((d: any) => {
-    const rid = d.rep_id ?? d.repId ?? d.owner_id ?? d.owner;
-    if (!rid) return;
-    const key = rid;
-    if (!repStats[key]) repStats[key] = { rep: { rep_id: key }, closed: 0, won: 0, revenue: 0 };
-    if (d.closed_at) {
-      repStats[key].closed += 1;
-      // treat closed deals as wins if no explicit flag
-      repStats[key].won += (d.is_won ? 1 : 1);
-      repStats[key].revenue += getAmount(d);
-    }
-  });
-  const repList = Object.values(repStats).map((s: any) => ({ rep: s.rep, closed: s.closed, won: s.won, revenue: s.revenue, winRate: s.closed ? (s.won / s.closed) * 100 : null }));
-  const avgWin = repList.filter((r: any) => r.winRate != null).reduce((a: number, b: any) => a + (b.winRate || 0), 0) / Math.max(1, repList.filter((r: any) => r.winRate != null).length);
-  const underperforming = repList.filter((r: any) => r.winRate != null && r.winRate < avgWin * 0.5).slice(0, 10);
+    // 1. Stale Enterprise Deals (Stuck > 30 days)
+    const staleEnterpriseDealsCount = await prisma.deal.count({
+      where: {
+        stage: { in: ["Prospecting", "Negotiation"] },
+        created_at: { lt: thirtyDaysAgo },
+        Account: { segment: "Enterprise" },
+      },
+    });
 
-  // Low activity accounts: accounts with few activities in the year
-  const actByAccount: any = {};
-  activities.forEach((a: any) => {
-    const aid = a.account_id ?? a.accountId ?? a.account;
-    if (!aid) return;
-    actByAccount[aid] = (actByAccount[aid] || 0) + 1;
-  });
-  const lowActivityAccounts = accounts.filter((acc: any) => (actByAccount[acc.account_id] || 0) < 2).slice(0, 50);
+    // 2. Specific Rep Performance: Ankit (R1)
+    // Calculating Win Rate: (Won / (Won + Lost)) * 100
+    const ankitDeals = await prisma.deal.findMany({
+      where: { rep_id: "R1" },
+      select: { stage: true },
+    });
 
-  return new Response(JSON.stringify({ staleDeals: stale.slice(0, 100), underperformingReps: underperforming, lowActivityAccounts }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    const won = ankitDeals.filter((d) => d.stage === "ClosedWon").length;
+    const lost = ankitDeals.filter((d) => d.stage === "ClosedLost").length;
+    const totalClosed = won + lost;
+    const ankitWinRate = totalClosed > 0 ? Math.round((won / totalClosed) * 100) : 0;
+
+    // 3. Low Activity Accounts (No activity in last 14 days)
+    const lowActivityAccountsCount = await prisma.account.count({
+      where: {
+        deals: {
+          every: {
+            activities: {
+              none: {
+                timestamp: { gt: fourteenDaysAgo },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({
+      status: "success",
+      data: [
+        {
+          id: "risk-1",
+          label: `${staleEnterpriseDealsCount} Enterprise deals stuck over 30 days`,
+          severity: "high",
+        },
+        {
+          id: "risk-2",
+          label: `Rep Ankit – Win Rate: ${ankitWinRate}%`,
+          severity: "medium",
+        },
+        {
+          id: "risk-3",
+          label: `${lowActivityAccountsCount} Accounts with no recent activity`,
+          severity: "low",
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("Risk Factor API Error:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error", status: "error" },
+      { status: 500 }
+    );
+  }
 }
