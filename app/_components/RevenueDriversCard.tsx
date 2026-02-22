@@ -1,7 +1,46 @@
 import { Card, CardContent, Typography, Divider } from "@mui/material";
 import { KpiRowChart } from "./KpiRowChart";
+import type { DriversData } from "@/app/_types";
 
-export const RevenueDriversCard = () => {
+interface RevenueDriversCardProps {
+  driversData: DriversData | null;
+}
+
+const formatCurrency = (value: number) => {
+  if (value >= 1000000) {
+    return `$${(value / 1000000).toFixed(1)}M`;
+  } else if (value >= 1000) {
+    return `$${(value / 1000).toFixed(1)}K`;
+  }
+  return `$${value.toFixed(0)}`;
+};
+
+const formatDelta = (value: number | null | undefined) => {
+  if (value == null) return null;
+  return value > 0 ? `+${value.toFixed(1)}` : `${value.toFixed(1)}`;
+};
+
+export const RevenueDriversCard = ({
+  driversData,
+}: RevenueDriversCardProps) => {
+  const pipelineSparklineData = driversData?.pipeline.sparkline.map(
+    (p) => p.value,
+  ) || [];
+  const winRateSparklineData = driversData?.winRate.sparkline.map(
+    (p) => p.value,
+  ) || [];
+  const avgDealSizeSparklineData = driversData?.avgDealSize.sparkline.map(
+    (p) => p.value,
+  ) || [];
+  const salesCycleSparklineData = driversData?.salesCycle.sparkline.map(
+    (p) => p.value,
+  ) || [];
+
+  const pipelineDelta = formatDelta(driversData?.pipeline.delta);
+  const winRateDelta = formatDelta(driversData?.winRate.delta);
+  const avgDealSizeDelta = formatDelta(driversData?.avgDealSize.delta);
+  const salesCycleDelta = formatDelta(driversData?.salesCycle.delta);
+
   return (
     <Card sx={{ maxWidth: 400, borderRadius: 2 }}>
       <CardContent>
@@ -13,35 +52,47 @@ export const RevenueDriversCard = () => {
 
         <KpiRowChart
           label="Pipeline Value"
-          value="$4.8M"
-          change="+12%"
-          positive
-          data={[10, 12, 11, 14, 16, 15, 18, 20, 17, 16, 19, 22]}
+          value={formatCurrency(driversData?.pipeline.value || 0)}
+          change={pipelineDelta || "N/A"}
+          positive={
+            driversData?.pipeline.delta != null &&
+            driversData?.pipeline.delta >= 0
+          }
+          data={pipelineSparklineData}
         />
 
         <KpiRowChart
           label="Win Rate"
-          value="18%"
-          change="-4%"
-          positive={false}
+          value={`${driversData?.winRate.value.toFixed(1) || 0}%`}
+          change={winRateDelta ? `${winRateDelta}%` : "N/A"}
+          positive={
+            driversData?.winRate.delta != null &&
+            driversData?.winRate.delta >= 0
+          }
           chartType="bar"
-          data={[5, 8, 12, 15, 11, 13, 16, 14, 12, 10, 18]}
+          data={winRateSparklineData}
         />
 
         <KpiRowChart
           label="Avg Deal Size"
-          value="$21.3K"
-          change="+3%"
-          positive
-          data={[8, 9, 7, 10, 8, 9, 7, 8, 9, 11, 10, 13]}
+          value={formatCurrency(driversData?.avgDealSize.value || 0)}
+          change={avgDealSizeDelta ? `${avgDealSizeDelta}%` : "N/A"}
+          positive={
+            driversData?.avgDealSize.delta != null &&
+            driversData?.avgDealSize.delta >= 0
+          }
+          data={avgDealSizeSparklineData}
         />
 
         <KpiRowChart
           label="Sales Cycle"
-          value="45 Days"
-          change="+9 Days"
-          positive
-          data={[20, 22, 25, 30, 28, 26, 29, 24, 23, 27]}
+          value={`${driversData?.salesCycle.value.toFixed(0) || 0} Days`}
+          change={salesCycleDelta ? `${salesCycleDelta} Days` : "N/A"}
+          positive={
+            driversData?.salesCycle.delta != null &&
+            driversData.salesCycle.delta <= 0
+          }
+          data={salesCycleSparklineData}
         />
       </CardContent>
     </Card>

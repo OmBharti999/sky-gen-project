@@ -13,7 +13,6 @@ import { CURRENT_QUARTER_NAME } from "./constants";
 
 export default async function Home() {
   const summaryData = await getSummaryData(CURRENT_QUARTER_NAME);
-  console.log("🚀 ~ Home ~ summaryData:", summaryData);
   const driversData = await getDriversData(CURRENT_QUARTER_NAME);
   return (
     <>
@@ -30,7 +29,7 @@ export default async function Home() {
           <Grid container spacing={3} sx={{ mt: 2 }}>
             {/* Left column – Revenue Drivers (always on top on mobile) */}
             <Grid size={{ xs: 12, md: 4 }}>
-              <RevenueDriversCard />
+              <RevenueDriversCard driversData={driversData?.data || null} />
             </Grid>
 
             {/* Right column – contains two cards + chart stacked */}
