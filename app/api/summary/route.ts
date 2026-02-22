@@ -1,21 +1,40 @@
+import { NextResponse } from "next/server";
 import { prisma } from "@/app/_lib/prisma";
 import { percentageToGoalCalculator } from "@/app/_lib/utils";
 import { SummaryApiResponse } from "@/app/_types";
 import { FINANCIAL_QUARTERS } from "@/app/constants";
-import { NextResponse } from "next/server";
 
-export async function GET() {
-  const currentQuarter = FINANCIAL_QUARTERS[0]; // Q1
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const quarterName = searchParams.get("quarter");
+
+  // Validate quarter name
+  if (!quarterName) {
+    return NextResponse.json(
+      { error: "Quarter parameter is required" },
+      { status: 400 },
+    );
+  }
+
+  const quarter = FINANCIAL_QUARTERS.find((q) => q.name === quarterName);
+
+  if (!quarter) {
+    return NextResponse.json(
+      { error: "Invalid quarter name" },
+      { status: 400 },
+    );
+  }
+
   // Fetch Quarterly Revenue
   const revenue = await prisma.deal.findMany({
     where: {
       created_at: {
-        gte: new Date(currentQuarter.startDate),
-        lte: new Date(currentQuarter.endDate),
+        gte: new Date(quarter.startDate),
+        lte: new Date(quarter.endDate),
       },
       closed_at: {
-        gte: new Date(currentQuarter.startDate),
-        lte: new Date(currentQuarter.endDate),
+        gte: new Date(quarter.startDate),
+        lte: new Date(quarter.endDate),
         not: null,
       },
     },
@@ -34,8 +53,8 @@ export async function GET() {
 
   const quaterlyTarget = target.reduce((acc, target) => {
     if (
-      new Date(target?.month) >= currentQuarter.startDate &&
-      new Date(target?.month) <= currentQuarter.endDate
+      new Date(target?.month) >= quarter.startDate &&
+      new Date(target?.month) <= quarter.endDate
     ) {
       return acc + (target.target || 0);
     }
@@ -51,7 +70,7 @@ export async function GET() {
     data: {
       quaterlyRevenue,
       quaterlyTarget,
-      currentQuarter,
+      quarter,
       percentageToGoal,
     },
     status: "success",

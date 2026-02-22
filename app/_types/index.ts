@@ -7,7 +7,7 @@ export interface Quarter {
 export interface SummaryData {
   quaterlyRevenue: number;
   quaterlyTarget: number;
-  currentQuarter: Quarter;
+  quarter: Quarter;
   percentageToGoal: number | null;
 }
 

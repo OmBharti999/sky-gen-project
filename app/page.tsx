@@ -8,16 +8,21 @@ import {
   TopRiskFactors,
 } from "./_components";
 import { getSummaryData } from "./_services/summaryService";
+import { CURRENT_QUARTER_NAME } from "./constants";
 
 export default async function Home() {
-  const summaryData = await getSummaryData();
-  console.log("🚀 ~ Home ~ summaryData:", summaryData)
+  const summaryData = await getSummaryData(CURRENT_QUARTER_NAME);
+  console.log("🚀 ~ Home ~ summaryData:", summaryData);
   return (
     <>
       <Header />
       <Box sx={{ backgroundColor: "#f3f4f6", minHeight: "100vh", py: 4 }}>
         <Container maxWidth="xl">
-          <SummaryBanner revenue={summaryData?.data?.quaterlyRevenue || 0} target={summaryData?.data?.quaterlyTarget || 0} percentageToGoal={summaryData?.data?.percentageToGoal} />
+          <SummaryBanner
+            revenue={summaryData?.data?.quaterlyRevenue || 0}
+            target={summaryData?.data?.quaterlyTarget || 0}
+            percentageToGoal={summaryData?.data?.percentageToGoal}
+          />
 
           {/* Two‑column layout on desktop */}
           <Grid container spacing={3} sx={{ mt: 2 }}>
