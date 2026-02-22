@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     quarterIndex > 0 ? FINANCIAL_QUARTERS[quarterIndex - 1] : null;
 
   // Fetch Quarterly Revenue
-  const revenue = await prisma.deal.findMany({
+  const revenueResult = await prisma.deal.aggregate({
     where: {
       created_at: {
         gte: new Date(quarter.startDate),
@@ -44,20 +44,17 @@ export async function GET(request: Request) {
         not: null,
       },
     },
-    select: {
+    _sum: {
       amount: true,
     },
   });
 
-  const quaterlyRevenue = revenue.reduce(
-    (acc, deal) => acc + (deal?.amount || 0),
-    0,
-  );
+  const quaterlyRevenue = revenueResult._sum.amount ?? 0;
 
   // Fetch Previous Quarter Revenue for QoQ Change
   let prevQuarterRevenue = 0;
   if (prevQuarter) {
-    const prevRevenue = await prisma.deal.findMany({
+    const prevRevenueResult = await prisma.deal.aggregate({
       where: {
         created_at: {
           gte: new Date(prevQuarter.startDate),
@@ -69,14 +66,11 @@ export async function GET(request: Request) {
           not: null,
         },
       },
-      select: {
+      _sum: {
         amount: true,
       },
     });
-    prevQuarterRevenue = prevRevenue.reduce(
-      (acc, deal) => acc + (deal?.amount || 0),
-      0,
-    );
+    prevQuarterRevenue = prevRevenueResult._sum.amount ?? 0;
   }
 
   // Calculate QoQ Change
